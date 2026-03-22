@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="V-Shape">
+<meta name="theme-color" content="#D85A30">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<title>V-Shape Workout</title>
+<style>
+  :root {
+    --orange: #D85A30; --orange-l: #FAECE7; --orange-d: #993C1D;
+    --amber: #BA7517;  --amber-l: #FAEEDA;  --amber-d: #633806;
+    --green: #1D9E75;  --green-l: #E1F5EE;  --green-d: #0F6E56;
+    --purple-l: #EEEDFE; --purple-d: #3C3489;
+    --gray-l: #F1EFE8; --gray-d: #5F5E5A;
+    --bg: #f7f6f2; --card: #ffffff;
+    --text: #2C2C2A; --muted: #888780;
+    --border: rgba(0,0,0,0.1);
+    --safe-top: env(safe-area-inset-top);
+    --safe-bot: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Nav */
+  .nav { background: var(--card); border-bottom: 1px solid var(--border); padding: calc(var(--safe-top) + 12px) 16px 12px; position: sticky; top: 0; z-index: 100; }
+  .nav-inner { display: flex; align-items: center; gap: 10px; }
+  .nav-icon { width: 36px; height: 36px; background: var(--orange); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .nav-icon svg { width: 22px; height: 22px; }
+  .nav-title { font-size: 17px; font-weight: 700; }
+  .nav-sub { font-size: 12px; color: var(--muted); }
+
+  /* Tabs */
+  .tabs { display: flex; padding: 12px 16px 0; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex-shrink: 0; font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .tab.active-p1 { background: var(--orange-l); color: var(--orange-d); border-color: var(--orange); }
+  .tab.active-p2 { background: var(--amber-l);  color: var(--amber-d);  border-color: var(--amber); }
+  .tab.active-p3 { background: var(--green-l);  color: var(--green-d);  border-color: var(--green); }
+
+  /* Scroll nav */
+  .section-nav { display: flex; padding: 12px 16px; gap: 8px; }
+  .snav { flex: 1; text-align: center; font-size: 12px; font-weight: 600; padding: 7px 4px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+  .snav.active { background: var(--orange); color: white; border-color: var(--orange); }
+
+  .content { padding: 0 16px 100px; }
+
+  /* Banner */
+  .banner { border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+  .banner-p1 { background: var(--orange-l); }
+  .banner-p2 { background: var(--amber-l); }
+  .banner-p3 { background: var(--green-l); }
+  .banner-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .b1 { color: var(--orange-d); } .b2 { color: var(--amber-d); } .b3 { color: var(--green-d); }
+  .banner-sub { font-size: 12px; color: var(--muted); }
+
+  /* Section title */
+  .sec-title { font-size: 16px; font-weight: 700; margin: 16px 0 10px; }
+
+  /* Schedule */
+  .sched-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .day-chip { flex-shrink: 0; width: 72px; border-radius: 10px; padding: 6px 4px; text-align: center; }
+  .dc-day { font-size: 12px; font-weight: 700; }
+  .dc-type { font-size: 10px; font-weight: 500; margin-top: 1px; }
+  .dc-hiit { background: var(--orange-l); color: var(--orange-d); }
+  .dc-core { background: var(--green-l); color: var(--green-d); }
+  .dc-walk { background: #EAF3DE; color: #27500A; }
+  .dc-rest { background: var(--gray-l); color: var(--gray-d); }
+  .dc-vshaped { background: var(--purple-l); color: var(--purple-d); }
+  .sched-detail { background: var(--card); border-radius: 10px; padding: 8px 12px; flex: 1; border: 1px solid var(--border); }
+  .sd-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .sd-sub { font-size: 11px; color: var(--muted); }
+
+  /* Filters */
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 12px; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .fbtn { flex-shrink: 0; font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; }
+  .fbtn.active { background: var(--orange-l); color: var(--orange-d); border-color: var(--orange); }
+
+  /* Cards */
+  .wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .wcard { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; transition: transform 0.1s; }
+  .wcard:active { transform: scale(0.97); }
+  .wcard.sel-p1 { border-color: var(--orange); background: var(--orange-l); }
+  .wcard.sel-p2 { border-color: var(--amber);  background: var(--amber-l); }
+  .wcard.sel-p3 { border-color: var(--green);  background: var(--green-l); }
+  .wcard-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .wcard-desc { font-size: 11px; color: var(--muted); margin-bottom: 7px; line-height: 1.4; }
+  .wcard-bot { display: flex; justify-content: space-between; align-items: center; }
+  .cal-badge { font-size: 10px; font-weight: 700; background: #F5C4B3; color: var(--orange-d); padding: 2px 6px; border-radius: 10px; }
+  .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+  .tag-easy   { background: #EAF3DE; color: #27500A; }
+  .tag-med    { background: var(--amber-l); color: var(--amber-d); }
+  .tag-hard   { background: #FCEBEB; color: #A32D2D; }
+  .tag-quiet  { background: var(--purple-l); color: var(--purple-d); }
+  .tag-v      { background: var(--green-l); color: var(--green-d); }
+
+  /* Plan list */
+  .plan-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
+  .plan-header { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .plan-header-title { font-size: 14px; font-weight: 700; }
+  .plan-header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .plan-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .plan-row:last-child { border-bottom: none; }
+  .pnum { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pnum-p1 { background: var(--orange-l); color: var(--orange-d); }
+  .pnum-p2 { background: var(--amber-l);  color: var(--amber-d); }
+  .pnum-p3 { background: var(--green-l);  color: var(--green-d); }
+  .pname { font-size: 13px; font-weight: 500; flex: 1; }
+  .ptime { font-size: 11px; color: var(--muted); }
+  .empty-plan { padding: 20px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* Timer */
+  .timer-card { background: var(--card); border-radius: 20px; padding: 24px 16px; text-align: center; box-shadow: 0 2px 16px rgba(0,0,0,0.08); margin-bottom: 16px; }
+  .timer-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .timer-num { font-size: 72px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+  .timer-phase { font-size: 16px; font-weight: 700; margin-top: 8px; min-height: 24px; }
+  .tw { color: var(--orange-d); }
+  .tr { color: var(--green-d); }
+  .prog-wrap { margin: 14px 0 4px; height: 8px; background: var(--gray-l); border-radius: 4px; overflow: hidden; }
+  .prog-bar { height: 8px; border-radius: 4px; transition: width 0.4s; }
+  .round-info { font-size: 12px; color: var(--muted); margin-top: 4px; min-height: 18px; }
+  .timer-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .tbtn { flex: 1; font-size: 15px; font-weight: 700; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+  .tbtn:active { transform: scale(0.97); }
+  .tbtn.primary { background: var(--orange); color: white; border-color: var(--orange); }
+  .tbtn.primary-p2 { background: var(--amber); border-color: var(--amber); }
+  .tbtn.primary-p3 { background: var(--green); border-color: var(--green); }
+
+  /* Install banner */
+  .install-hint { background: #042C53; color: white; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .install-hint .ih-icon { font-size: 20px; flex-shrink: 0; }
+  .install-hint b { display: block; font-size: 14px; margin-bottom: 2px; }
+  .install-hint .ih-close { margin-left: auto; font-size: 20px; cursor: pointer; opacity: 0.7; flex-shrink: 0; }
+
+  /* Bottom safe area */
+  .bottom-space { height: calc(var(--safe-bot) + 20px); }
+</style>
+</head>
+<body>
+
+<!-- Install hint for Safari -->
+<div class="install-hint" id="install-hint">
+  <div class="ih-icon">📲</div>
+  <div>
+    <b>บันทึกเป็นแอพ</b>
+    กด Share → "Add to Home Screen"
+  </div>
+  <div class="ih-close" onclick="document.getElementById('install-hint').style.display='none'">✕</div>
+</div>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="6,4 12,20 18,4"></polyline>
+        <line x1="8" y1="20" x2="16" y2="20"></line>
+      </svg>
+    </div>
+    <div>
+      <div class="nav-title">V-Shape Workout</div>
+      <div class="nav-sub" id="nav-sub">เฟส 1 — 105→97 กก.</div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab" id="tab-1" onclick="setPhase(1)">เฟส 1</div>
+  <div class="tab" id="tab-2" onclick="setPhase(2)">เฟส 2</div>
+  <div class="tab" id="tab-3" onclick="setPhase(3)">เฟส 3</div>
+</div>
+
+<div class="section-nav">
+  <div class="snav active" id="snav-sched" onclick="scrollTo('sched')">📅 ตาราง</div>
+  <div class="snav" id="snav-select" onclick="scrollTo('select')">💪 เลือกท่า</div>
+  <div class="snav" id="snav-timer" onclick="scrollTo('timer')">⏱ Timer</div>
+</div>
+
+<div class="content">
+  <div id="banner" class="banner banner-p1">
+    <div class="banner-title b1" id="banner-title">เฟส 1: สร้างนิสัย</div>
+    <div class="banner-sub" id="banner-sub">เป้าหมาย 105 → 97 กก. | ออกกำลัง 20–30 นาที/วัน</div>
+  </div>
+
+  <!-- Schedule -->
+  <div id="sched">
+    <div class="sec-title">📅 ตารางรายสัปดาห์</div>
+    <div id="sched-list"></div>
+  </div>
+
+  <!-- Select exercises -->
+  <div id="select">
+    <div class="sec-title">💪 เลือกท่าออกกำลังกาย</div>
+    <div class="filter-row" id="filter-row">
+      <div class="fbtn active" onclick="setFilter('all', this)">ทั้งหมด</div>
+      <div class="fbtn" onclick="setFilter('easy', this)">เริ่มต้น</div>
+      <div class="fbtn" onclick="setFilter('med', this)">กลาง</div>
+      <div class="fbtn" onclick="setFilter('hard', this)">เข้มข้น</div>
+      <div class="fbtn" onclick="setFilter('quiet', this)">เสียงน้อย</div>
+    </div>
+    <div class="wgrid" id="wgrid"></div>
+  </div>
+
+  <!-- Plan + Timer -->
+  <div id="timer">
+    <div class="sec-title">⏱ โปรแกรม + Timer</div>
+    <div class="plan-card" id="plan-card">
+      <div class="plan-header">
+        <div class="plan-header-title" id="plan-title">ยังไม่ได้เลือกท่า</div>
+        <div class="plan-header-sub" id="plan-sub">เลือกท่าด้านบน 1–6 ท่า</div>
+      </div>
+      <div id="plan-list"><div class="empty-plan">เลือกท่าออกกำลังกายด้านบนก่อนนะครับ</div></div>
+    </div>
+
+    <div class="timer-card">
+      <div class="timer-label" id="tlabel">เลือกท่าก่อนเริ่ม</div>
+      <div class="timer-num" id="tnum">00</div>
+      <div class="timer-phase" id="tphase"></div>
+      <div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0%;background:var(--orange)"></div></div>
+      <div class="round-info" id="rinfo"></div>
+      <div class="timer-btns">
+        <button class="tbtn" onclick="resetTimer()">รีเซ็ต</button>
+        <button class="tbtn primary" id="startbtn" onclick="toggleTimer()">เริ่ม</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-space"></div>
+</div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Hide install hint if already standalone
+if (window.navigator.standalone) {
+  document.getElementById('install-hint').style.display = 'none';
+}
+
+const PHASES = {
+  1: {
+    label:"เฟส 1: สร้างนิสัย", sub:"เป้าหมาย 105 → 97 กก. | ออกกำลัง 20–30 นาที/วัน",
+    navsub:"เฟส 1 — 105→97 กก.", work:40, rest:20, rounds:3, col:"var(--orange)", colClass:"primary",
+    schedule:[
+      {day:"จันทร์",  type:"hiit",    title:"HIIT 20 นาที",      detail:"High Knees + Jumping Jacks"},
+      {day:"อังคาร",  type:"walk",    title:"เดินเร็ว 30 นาที",  detail:"เดินในห้องหรือรอบตึก"},
+      {day:"พุธ",     type:"core",    title:"แกนกลาง 20 นาที",  detail:"Plank 3×60วิ + Leg Raise 3×12"},
+      {day:"พฤหัส",   type:"hiit",    title:"HIIT 20 นาที",      detail:"Mountain Climber + Butt Kicks"},
+      {day:"ศุกร์",   type:"walk",    title:"เดินเร็ว 30 นาที",  detail:"เดินในห้องหรือรอบตึก"},
+      {day:"เสาร์",   type:"core",    title:"แกนกลาง 20 นาที",  detail:"Bicycle Crunch + Dead Bug"},
+      {day:"อาทิตย์", type:"rest",    title:"พักผ่อน",            detail:"นอนหลับ ฟื้นฟูร่างกาย"},
+    ],
+    ids:["jj","hk","bk","mc","sqk","lir","ss"]
+  },
+  2: {
+    label:"เฟส 2: เพิ่มความเข้มข้น", sub:"เป้าหมาย 97 → 90 กก. | ออกกำลัง 25–45 นาที/วัน",
+    navsub:"เฟส 2 — 97→90 กก.", work:40, rest:15, rounds:4, col:"var(--amber)", colClass:"primary-p2",
+    schedule:[
+      {day:"จันทร์",  type:"hiit",    title:"HIIT 30 นาที",      detail:"Burpee + Skater Hop"},
+      {day:"อังคาร",  type:"core",    title:"กล้ามเนื้อ 30 นาที",detail:"วิดพื้น 3×15 + Squat 3×20"},
+      {day:"พุธ",     type:"hiit",    title:"HIIT 25 นาที",      detail:"Shadow Boxing + High Knees"},
+      {day:"พฤหัส",   type:"core",    title:"กล้ามเนื้อ 30 นาที",detail:"Plank 3×60วิ + Leg Raise"},
+      {day:"ศุกร์",   type:"hiit",    title:"HIIT 30 นาที",      detail:"Jump Squat + Mountain Climber"},
+      {day:"เสาร์",   type:"walk",    title:"เดินเร็ว 45 นาที",  detail:"นอกห้องหรือที่จอดรถ"},
+      {day:"อาทิตย์", type:"rest",    title:"พักผ่อน",            detail:"นอนหลับ ฟื้นฟูร่างกาย"},
+    ],
+    ids:["bp","jj","hk","bk","mc","sk","sb","jsq"]
+  },
+  3: {
+    label:"เฟส 3: Lean Out + V-Shape", sub:"เป้าหมาย 90 → 80 กก. | ออกกำลัง 30–45 นาที/วัน",
+    navsub:"เฟส 3 — 90→80 กก.", work:40, rest:15, rounds:4, col:"var(--green)", colClass:"primary-p3",
+    schedule:[
+      {day:"จันทร์",  type:"vshaped", title:"V-Shape 40 นาที",   detail:"Pull-up 3×8 + Wood Chop + Side Plank"},
+      {day:"อังคาร",  type:"hiit",    title:"HIIT 30 นาที",      detail:"Burpee + High Knees + Jump Squat"},
+      {day:"พุธ",     type:"core",    title:"กล้ามเนื้อ 40 นาที",detail:"วิดพื้น 4×15 + Russian Twist + Plank"},
+      {day:"พฤหัส",   type:"hiit",    title:"HIIT 30 นาที",      detail:"Mountain Climber + Skater Hop"},
+      {day:"ศุกร์",   type:"vshaped", title:"V-Shape 40 นาที",   detail:"Lat Pulldown + Cable Wood Chop + Side Plank"},
+      {day:"เสาร์",   type:"hiit",    title:"HIIT 30 นาที",      detail:"Burpee + Shadow Boxing"},
+      {day:"อาทิตย์", type:"rest",    title:"พักผ่อน",            detail:"นอนหลับ ฟื้นฟูร่างกาย"},
+    ],
+    ids:["bp","hk","mc","jsq","sk","sb","sph","rt"]
+  }
+};
+
+const WORKOUTS = [
+  {id:"jj",  name:"Jumping Jacks",      desc:"กางแขน-ขาพร้อมกัน กระโดดสลับ",          cal:"8–10", level:"easy", quiet:false, phases:[1,2]},
+  {id:"hk",  name:"High Knees",         desc:"วิ่งอยู่กับที่ ยกเข่าสูงถึงเอว",          cal:"10–12",level:"hard", quiet:false, phases:[1,2,3]},
+  {id:"bk",  name:"Butt Kicks",         desc:"วิ่งอยู่กับที่ เตะส้นเท้าถึงก้น",         cal:"9–11", level:"med",  quiet:false, phases:[1,2]},
+  {id:"jsq", name:"Jump Squat",         desc:"สควอทลง แล้วกระโดดขึ้น ลงนุ่ม",          cal:"10–12",level:"hard", quiet:false, phases:[2,3]},
+  {id:"mc",  name:"Mountain Climber",   desc:"ท่าวิดพื้น วิ่งขาสลับเร็วๆ",             cal:"9–11", level:"med",  quiet:true,  phases:[1,2,3]},
+  {id:"bp",  name:"Burpee",             desc:"ลงท่าวิดพื้น → กระโดดขึ้น ท่าเดียวครบ", cal:"12–15",level:"hard", quiet:false, phases:[2,3]},
+  {id:"sk",  name:"Skater Hop",         desc:"กระโดดข้าง ซ้าย-ขวา เหมือนสเก็ต",        cal:"9–11", level:"med",  quiet:false, phases:[2,3]},
+  {id:"sqk", name:"Squat + Side Kick",  desc:"สควอทลง แล้วเตะข้าง ไม่ต้องกระโดด",      cal:"6–8",  level:"easy", quiet:true,  phases:[1]},
+  {id:"sb",  name:"Shadow Boxing",      desc:"ต่อยอากาศเร็วๆ หมุนตัว",                 cal:"8–10", level:"med",  quiet:true,  phases:[2,3]},
+  {id:"lir", name:"Low Impact Run",     desc:"วิ่งอยู่กับที่แบบนุ่ม ไม่กระแทก",         cal:"7–9",  level:"easy", quiet:true,  phases:[1]},
+  {id:"sph", name:"Side Plank+Hip Dip", desc:"แพลงค์ข้าง กระดกสะโพกขึ้น-ลง",          cal:"4–5",  level:"med",  quiet:true,  phases:[3]},
+  {id:"rt",  name:"Russian Twist",      desc:"นั่ง เอียงตัว หมุนซ้าย-ขวา",             cal:"5–6",  level:"med",  quiet:true,  phases:[3]},
+];
+
+let curPhase=1, curFilter="all", selected=[];
+let running=false, timerInt=null, timerPhase="work", tLeft=40, curRound=0, curEx=0;
+
+function setPhase(p) {
+  curPhase=p; selected=[];
+  [1,2,3].forEach(i => {
+    const t = document.getElementById(`tab-${i}`);
+    t.className = 'tab' + (i===p ? ` active-p${i}` : '');
+  });
+  const ph = PHASES[p];
+  document.getElementById('nav-sub').textContent = ph.navsub;
+  const banner = document.getElementById('banner');
+  banner.className = `banner banner-p${p}`;
+  document.getElementById('banner-title').className = `banner-title b${p}`;
+  document.getElementById('banner-title').textContent = ph.label;
+  document.getElementById('banner-sub').textContent = ph.sub;
+  document.getElementById('startbtn').className = `tbtn primary${p>1?'-p'+p:''}`;
+  renderSched(); renderCards(); renderPlan(); resetTimer();
+}
+
+function renderSched() {
+  const sch = PHASES[curPhase].schedule;
+  let h = '';
+  sch.forEach(s => {
+    h += `<div class="sched-row">
+      <div class="day-chip dc-${s.type}"><div class="dc-day">${s.day}</div><div class="dc-type">${s.type==='hiit'?'HIIT':s.type==='core'?'Core':s.type==='walk'?'เดิน':s.type==='vshaped'?'V-Shape':'พัก'}</div></div>
+      <div class="sched-detail"><div class="sd-title">${s.title}</div><div class="sd-sub">${s.detail}</div></div>
+    </div>`;
+  });
+  document.getElementById('sched-list').innerHTML = h;
+}
+
+function tagLevel(w) {
+  return w.level==='hard'?`<span class="tag tag-hard">เข้มข้น</span>`:w.level==='med'?`<span class="tag tag-med">กลาง</span>`:`<span class="tag tag-easy">เริ่มต้น</span>`;
+}
+
+function setFilter(f, btn) {
+  curFilter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function renderCards() {
+  let list = WORKOUTS.filter(w=>w.phases.includes(curPhase));
+  if (curFilter==='easy') list=list.filter(w=>w.level==='easy');
+  if (curFilter==='med')  list=list.filter(w=>w.level==='med');
+  if (curFilter==='hard') list=list.filter(w=>w.level==='hard');
+  if (curFilter==='quiet') list=list.filter(w=>w.quiet);
+  const g = document.getElementById('wgrid');
+  g.innerHTML = '';
+  list.forEach(w => {
+    const isSel = selected.includes(w.id);
+    const d = document.createElement('div');
+    d.className = 'wcard' + (isSel ? ` sel-p${curPhase}` : '');
+    d.innerHTML = `<div class="wcard-name">${w.name}</div><div class="wcard-desc">${w.desc}</div><div class="wcard-bot"><div class="tags">${tagLevel(w)}${w.quiet?'<span class="tag tag-quiet">เงียบ</span>':''}${w.phases.includes(3)&&curPhase===3?'<span class="tag tag-v">V-shape</span>':''}</div><span class="cal-badge">${w.cal}</span></div>`;
+    d.onclick = () => { toggleSel(w.id); };
+    g.appendChild(d);
+  });
+}
+
+function toggleSel(id) {
+  if (selected.includes(id)) selected=selected.filter(x=>x!==id);
+  else if (selected.length<6) selected.push(id);
+  renderCards(); renderPlan();
+}
+
+function renderPlan() {
+  const ph = PHASES[curPhase];
+  const pt = document.getElementById('plan-title');
+  const ps = document.getElementById('plan-sub');
+  const pl = document.getElementById('plan-list');
+  if (!selected.length) {
+    pt.textContent='ยังไม่ได้เลือกท่า'; ps.textContent='เลือกท่าด้านบน 1–6 ท่า';
+    pl.innerHTML='<div class="empty-plan">เลือกท่าออกกำลังกายด้านบนก่อนนะครับ</div>'; return;
+  }
+  pt.textContent=`โปรแกรม ${selected.length} ท่า`;
+  ps.textContent=`${ph.work}วิ ทำ / ${ph.rest}วิ พัก × ${ph.rounds} รอบ`;
+  pl.innerHTML = selected.map((id,i)=>{
+    const w=WORKOUTS.find(x=>x.id===id);
+    return `<div class="plan-row"><div class="pnum pnum-p${curPhase}">${i+1}</div><div class="pname">${w.name}</div><div class="ptime">${ph.work}วิ/${ph.rest}วิ×${ph.rounds}</div></div>`;
+  }).join('');
+}
+
+function pad(n){return String(n).padStart(2,'0');}
+
+function updateDisplay() {
+  if (!selected.length) return;
+  const w = WORKOUTS.find(x=>x.id===selected[curEx]);
+  document.getElementById('tlabel').textContent = w ? w.name : '';
+  document.getElementById('tnum').textContent = pad(tLeft);
+  const tp = document.getElementById('tphase');
+  tp.textContent = timerPhase==='work' ? '💪 ออกกำลัง' : '😮‍💨 พักผ่อน';
+  tp.className = 'timer-phase ' + (timerPhase==='work'?'tw':'tr');
+  const ph = PHASES[curPhase];
+  const total = timerPhase==='work'?ph.work:ph.rest;
+  const bar = document.getElementById('prog');
+  bar.style.width = ((1-tLeft/total)*100)+'%';
+  bar.style.background = ph.col;
+  const totalR = selected.length*ph.rounds;
+  const doneR = curEx*ph.rounds+curRound;
+  document.getElementById('rinfo').textContent = `รอบ ${doneR+1} / ${totalR}`;
+}
+
+function toggleTimer() {
+  if (!selected.length) { alert('กรุณาเลือกท่าออกกำลังกายก่อน'); return; }
+  if (running) { clearInterval(timerInt); running=false; document.getElementById('startbtn').textContent='ต่อ'; }
+  else {
+    running=true; document.getElementById('startbtn').textContent='หยุด';
+    if (tLeft===0) tLeft=PHASES[curPhase].work;
+    updateDisplay(); timerInt=setInterval(tick,1000);
+  }
+}
+
+function tick() {
+  if (tLeft<=0) {
+    const ph=PHASES[curPhase];
+    if (timerPhase==='work') { timerPhase='rest'; tLeft=ph.rest; }
+    else {
+      curRound++;
+      if (curRound>=ph.rounds) { curRound=0; curEx++; }
+      if (curEx>=selected.length) { resetTimer(); alert('เสร็จแล้ว! 🎉\nยอดเยี่ยมมากครับ!'); return; }
+      timerPhase='work'; tLeft=ph.work;
+    }
+  }
+  updateDisplay(); tLeft--;
+}
+
+function resetTimer() {
+  clearInterval(timerInt); running=false;
+  timerPhase='work'; tLeft=PHASES[curPhase].work; curRound=0; curEx=0;
+  document.getElementById('startbtn').textContent='เริ่ม';
+  document.getElementById('tnum').textContent='00';
+  document.getElementById('tphase').textContent='';
+  document.getElementById('tlabel').textContent='เลือกท่าก่อนเริ่ม';
+  document.getElementById('prog').style.width='0%';
+  document.getElementById('rinfo').textContent='';
+}
+
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.snav').forEach(s=>s.classList.remove('active'));
+  document.getElementById('snav-'+id).classList.add('active');
+}
+
+setPhase(1);
+</script>
+</body>
+</html>
